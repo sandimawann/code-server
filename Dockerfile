@@ -1,7 +1,11 @@
-# Start from the code-server Debian base image
-FROM codercom/code-server:4.0.2
+# Start from the code-server Ubuntu base image
+FROM codercom/code-server:4.8.3-ubuntu
 
-USER coder
+USER root
+
+# Set Time in Singapore
+ENV TZ=Asia/Singapore
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Apply VS Code settings
 COPY deploy-container/settings.json .local/share/code-server/User/settings.json
@@ -9,8 +13,9 @@ COPY deploy-container/settings.json .local/share/code-server/User/settings.json
 # Use bash shell
 ENV SHELL=/bin/bash
 
-# Install unzip + rclone (support for remote filesystem)
-RUN sudo apt-get update && sudo apt-get install unzip -y
+# Install package
+RUN sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install tzdata systemd openssh-server neofetch curl pkg-config libssl-dev liblz4-tool chrony bsdmainutils clang tar build-essential ncdu git wget jq make gcc rustc cargo tmux unzip -y
+# install rclone (support for remote filesystem)
 RUN curl https://rclone.org/install.sh | sudo bash
 
 # Copy rclone tasks to /tmp, to potentially be used
@@ -27,7 +32,7 @@ RUN sudo chown -R coder:coder /home/coder/.local
 # RUN code-server --install-extension esbenp.prettier-vscode
 
 # Install apt packages:
-# RUN sudo apt-get install -y ubuntu-make
+RUN sudo apt-get install ubuntu-make -y 
 
 # Copy files: 
 # COPY deploy-container/myTool /home/coder/myTool
